@@ -1,2 +1,2 @@
 # Proyecto_Lula3
-Contine actualizacion de infraestructiura hasta el 2do semestre de 2025
+Continúa la actualización de infraestructura hasta el 2do semestre de 2025
