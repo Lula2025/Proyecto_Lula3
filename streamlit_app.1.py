@@ -549,10 +549,39 @@ parcelas_estado = (
 centros_estados = {
     "Aguascalientes": {"lat": 21.885, "lon": -102.291},
     "Baja California": {"lat": 30.840, "lon": -115.283},
-    # ... todas las demás ...
+    "Baja California Sur": {"lat": 26.049, "lon": -111.666},
+    "Campeche": {"lat": 19.830, "lon": -90.534},
+    "Chiapas": {"lat": 16.756, "lon": -93.116},
+    "Chihuahua": {"lat": 28.632, "lon": -106.069},
+    "Ciudad de México": {"lat": 19.432, "lon": -99.133},
+    "Coahuila": {"lat": 27.058, "lon": -101.706},
+    "Colima": {"lat": 19.243, "lon": -103.724},
+    "Durango": {"lat": 24.027, "lon": -104.653},
+    "Guanajuato": {"lat": 21.019, "lon": -101.257},
+    "Guerrero": {"lat": 17.551, "lon": -99.503},
+    "Hidalgo": {"lat": 20.091, "lon": -98.762},
+    "Jalisco": {"lat": 20.659, "lon": -103.349},
+    "México": {"lat": 19.345, "lon": -99.837},
+    "Michoacán": {"lat": 19.566, "lon": -101.706},
+    "Morelos": {"lat": 18.681, "lon": -99.101},
+    "Nayarit": {"lat": 21.751, "lon": -104.845},
+    "Nuevo León": {"lat": 25.675, "lon": -100.318},
+    "Oaxaca": {"lat": 17.073, "lon": -96.726},
+    "Puebla": {"lat": 19.041, "lon": -98.206},
+    "Querétaro": {"lat": 20.588, "lon": -100.389},
+    "Quintana Roo": {"lat": 19.181, "lon": -88.479},
+    "San Luis Potosí": {"lat": 22.156, "lon": -100.985},
+    "Sinaloa": {"lat": 25.172, "lon": -107.479},
+    "Sonora": {"lat": 29.297, "lon": -110.330},
+    "Tabasco": {"lat": 17.840, "lon": -92.618},
+    "Tamaulipas": {"lat": 23.747, "lon": -98.525},
+    "Tlaxcala": {"lat": 19.318, "lon": -98.237},
+    "Veracruz": {"lat": 19.173, "lon": -96.134},
+    "Yucatán": {"lat": 20.709, "lon": -89.094},
     "Zacatecas": {"lat": 22.770, "lon": -102.583}
 }
 
+# Agregar columnas de latitud y longitud
 parcelas_estado["Latitud"] = parcelas_estado["Estado"].map(lambda x: centros_estados.get(x, {}).get("lat", 23.0))
 parcelas_estado["Longitud"] = parcelas_estado["Estado"].map(lambda x: centros_estados.get(x, {}).get("lon", -102.0))
 
@@ -564,21 +593,19 @@ fig_estado = px.scatter_mapbox(
     size="Parcelas",
     color="Parcelas",
     hover_name="Estado",
-    hover_data={"Parcelas": True},  # <- quitamos Latitud y Longitud del hover
+    hover_data={"Parcelas": True, "Latitud": False, "Longitud": False},  # <- ocultamos Lat/Lon
     color_continuous_scale="Viridis",
     size_max=50,
     zoom=4.5,
     mapbox_style="carto-positron",
-    title="📍 Número de Parcelas Atendidas por Estado",
+    title="📍 Número de Parcelas Atendidas por Estado"
 )
 
-# --- Ajustar escala de colores para diferenciar mejor ---
-fig_estado.update_traces(marker=dict(sizemode="area", sizeref=2, sizemin=5))
+# Ajustes de layout para mejorar vista
 fig_estado.update_layout(
-    coloraxis_colorbar=dict(title="Parcelas"),
-    coloraxis=dict(cmin=parcelas_estado["Parcelas"].min(), cmax=parcelas_estado["Parcelas"].max() * 1.2),  # ampliar rango de colores
     margin={"l":0,"r":0,"t":50,"b":0},
-    height=700
+    height=700,
+    coloraxis_colorbar=dict(title="Parcelas"),
 )
 
 # Mostrar mapa en Streamlit
