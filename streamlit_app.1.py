@@ -142,6 +142,16 @@ with st.sidebar.expander("Estado"):
         datos_filtrados = datos_filtrados[datos_filtrados["Estado"].isin(seleccion_estados)]
 
 # Filtro por Régimen Hídrico
+
+cambios_regimen = {
+    "RIEGO": "Riego",
+    "TEMPORAL": "Temporal",
+    # agrega más según necesites
+}
+
+datos_filtrados["Régimen Hídrico"] = datos_filtrados["Régimen Hídrico"].replace(cambios_regimen)
+
+
 with st.sidebar.expander("Régimen Hídrico"):
     regimenes = sorted(datos_filtrados["Tipo_Regimen_Hidrico"].unique())
     seleccion_regimen = checkbox_list("Régimen", regimenes, "regimen")
