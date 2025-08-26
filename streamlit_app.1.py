@@ -537,7 +537,7 @@ fig_mapa_geo.update_layout(
 # Mostrar mapa en Streamlit
 st.plotly_chart(fig_mapa_geo, use_container_width=True)
 
------------------------------------
+# -----------------------------------
 # --- Agrupar datos por Estado ---
 parcelas_estado = (
     datos_filtrados.groupby("Estado")["Id_Parcela(Unico)"]
