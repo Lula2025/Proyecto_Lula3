@@ -607,7 +607,7 @@ cmin = parcelas_estado["Parcelas"].min()
 cmax = parcelas_estado["Parcelas"].max()
 
 # Definir pasos automáticos (cada ~5,000 si aplica)
-step = max(1, int((cmax - cmin) / 6))  # divide en aprox 6 categorías
+step = max(1, int((cmax - cmin) / 20))  # divide en aprox 6 categorías
 fig_estado.update_traces(
     marker=dict(
         sizemode="area",
