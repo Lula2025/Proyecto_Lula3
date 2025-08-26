@@ -482,7 +482,7 @@ if {"Id_Productor", "Genero", "Proyecto", "Anio"}.issubset(datos_filtrados.colum
 
 
 
-# --- Preparar datos para el mapa geográfico filtrado por Estado ---
+# --- Preparar datos ---
 datos_filtrados["Latitud"] = pd.to_numeric(datos_filtrados["Latitud"], errors="coerce")
 datos_filtrados["Longitud"] = pd.to_numeric(datos_filtrados["Longitud"], errors="coerce")
 datos_geo = datos_filtrados.dropna(subset=["Latitud", "Longitud"])
@@ -498,9 +498,10 @@ parcelas_geo = (
 if seleccion_estados:
     parcelas_geo = parcelas_geo[parcelas_geo["Estado"].isin(seleccion_estados)]
 
-# --- Calcular el centro y límites automáticamente ---
-lat_center = (parcelas_geo["Latitud"].min() + parcelas_geo["Latitud"].max()) / 2
-lon_center = (parcelas_geo["Longitud"].min() + parcelas_geo["Longitud"].max()) / 2
+# --- Definir centro y límites para México ---
+mexico_center = {"lat": 23.0, "lon": -102.0}  # Centro aproximado de México
+lat_range = [14.5, 32.7]  # Sur a Norte
+lon_range = [-118.5, -86.7]  # Oeste a Este
 
 # --- Crear mapa interactivo ---
 fig_mapa_geo = px.scatter_mapbox(
@@ -512,12 +513,26 @@ fig_mapa_geo = px.scatter_mapbox(
     hover_name="Estado",
     hover_data={"Latitud": True, "Longitud": True, "Parcelas": True},
     mapbox_style="carto-positron",
-    center={"lat": lat_center, "lon": lon_center},  # Centrar mapa
-    zoom=4.5,                                       # Ajusta para abarcar toda México
-    title="📍 Distribución Geográfica de Parcelas por Estado"
+    center=mexico_center,
+    zoom=4.5,  # Ajusta para ver todo México
+    height=700,  # Hacerlo más cuadrado
+    width=700,   # Opcional si quieres controlar el ancho
+    title="📍 Distribución Geográfica de Parcelas en México"
 )
 
+# Ajustar tamaño máximo de los puntos
 fig_mapa_geo.update_traces(marker=dict(sizemode="area", sizeref=2, sizemin=5))
 
-# Mostrar el mapa en Streamlit
+# Limitar visualización al rango de México
+fig_mapa_geo.update_layout(
+    mapbox=dict(
+        center=mexico_center,
+        zoom=4.5,
+        bearing=0,
+        pitch=0,
+    ),
+    margin={"l":0,"r":0,"t":50,"b":0}
+)
+
+# Mostrar mapa en Streamlit
 st.plotly_chart(fig_mapa_geo, use_container_width=True)
