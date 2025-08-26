@@ -130,6 +130,10 @@ cambios_estados = {
     "PUEBLA": "Puebla",
     "SINALOA": "Sinaloa",
     "TABASCO": "Tabasco",
+    "Michoacán de Ocampo": "Michoacán",
+    "Ciudad de Mexico": "Ciudad de México",
+    "Veracruz de Ignacio de la Llave": "Veracruz",
+    
     # agrega más según necesites
 }
 
