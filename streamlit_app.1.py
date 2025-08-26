@@ -146,11 +146,10 @@ with st.sidebar.expander("Estado"):
 cambios_regimen = {
     "RIEGO": "Riego",
     "TEMPORAL": "Temporal",
-    # agrega más según necesites
 }
 
-datos_filtrados["Régimen Hídrico"] = datos_filtrados["Régimen Hídrico"].replace(cambios_regimen)
-
+# Normalizar la columna correcta
+datos_filtrados["Tipo_Regimen_Hidrico"] = datos_filtrados["Tipo_Regimen_Hidrico"].replace(cambios_regimen)
 
 with st.sidebar.expander("Régimen Hídrico"):
     regimenes = sorted(datos_filtrados["Tipo_Regimen_Hidrico"].unique())
