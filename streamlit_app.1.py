@@ -585,7 +585,7 @@ centros_estados = {
 parcelas_estado["Latitud"] = parcelas_estado["Estado"].map(lambda x: centros_estados.get(x, {}).get("lat", 23.0))
 parcelas_estado["Longitud"] = parcelas_estado["Estado"].map(lambda x: centros_estados.get(x, {}).get("lon", -102.0))
 
-# --- Crear mapa de burbujas ---
+# --- Crear mapa de burbujas con etiquetas ---
 fig_estado = px.scatter_mapbox(
     parcelas_estado,
     lat="Latitud",
@@ -593,20 +593,37 @@ fig_estado = px.scatter_mapbox(
     size="Parcelas",
     color="Parcelas",
     hover_name="Estado",
-    hover_data={"Parcelas": True, "Latitud": False, "Longitud": False},  # <- ocultamos Lat/Lon
-    color_continuous_scale="Viridis",
+    hover_data={"Parcelas": True, "Latitud": False, "Longitud": False},  # quitar lat/lon del hover
     size_max=50,
+    color_continuous_scale="Viridis",
     zoom=4.5,
     mapbox_style="carto-positron",
     title="📍 Número de Parcelas Atendidas por Estado"
 )
 
-# Ajustes de layout para mejorar vista
+# Ajustes de marker para más diversidad de colores y mostrar número de parcelas
+cmin = parcelas_estado["Parcelas"].min()
+cmax = parcelas_estado["Parcelas"].max() * 1.5  # ampliar rango de colores
+fig_estado.update_traces(
+    marker=dict(
+        sizemode="area",
+        sizeref=2,
+        sizemin=5,
+        color=parcelas_estado["Parcelas"],
+        cmin=cmin,
+        cmax=cmax,
+        showscale=True
+    ),
+    text=parcelas_estado["Parcelas"],  # mostrar número de parcelas sobre el círculo
+    textposition="top center"
+)
+
+# Layout general
 fig_estado.update_layout(
     margin={"l":0,"r":0,"t":50,"b":0},
     height=700,
     coloraxis_colorbar=dict(title="Parcelas"),
 )
 
-# Mostrar mapa en Streamlit
+# Mostrar en Streamlit
 st.plotly_chart(fig_estado, use_container_width=True)
