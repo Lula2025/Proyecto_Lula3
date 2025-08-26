@@ -538,52 +538,12 @@ fig_mapa_geo.update_layout(
 st.plotly_chart(fig_mapa_geo, use_container_width=True)
 
 # -----------------------------------
-# --- Agrupar datos por Estado ---
-parcelas_estado = (
-    datos_filtrados.groupby("Estado")["Id_Parcela(Unico)"]
-    .nunique()
-    .reset_index(name="Parcelas")
-)
-
-# --- Coordenadas aproximadas para el centro de cada estado ---
-centros_estados = {
-    "Aguascalientes": {"lat": 21.885, "lon": -102.291},
-    "Baja California": {"lat": 30.840, "lon": -115.283},
-    "Baja California Sur": {"lat": 26.049, "lon": -111.666},
-    "Campeche": {"lat": 19.830, "lon": -90.534},
-    "Chiapas": {"lat": 16.756, "lon": -93.116},
-    "Chihuahua": {"lat": 28.632, "lon": -106.069},
-    "Ciudad de México": {"lat": 19.432, "lon": -99.133},
-    "Coahuila": {"lat": 27.058, "lon": -101.706},
-    "Colima": {"lat": 19.243, "lon": -103.724},
-    "Durango": {"lat": 24.027, "lon": -104.653},
-    "Guanajuato": {"lat": 21.019, "lon": -101.257},
-    "Guerrero": {"lat": 17.551, "lon": -99.503},
-    "Hidalgo": {"lat": 20.091, "lon": -98.762},
-    "Jalisco": {"lat": 20.659, "lon": -103.349},
-    "México": {"lat": 19.345, "lon": -99.837},
-    "Michoacán": {"lat": 19.566, "lon": -101.706},
-    "Morelos": {"lat": 18.681, "lon": -99.101},
-    "Nayarit": {"lat": 21.751, "lon": -104.845},
-    "Nuevo León": {"lat": 25.675, "lon": -100.318},
-    "Oaxaca": {"lat": 17.073, "lon": -96.726},
-    "Puebla": {"lat": 19.041, "lon": -98.206},
-    "Querétaro": {"lat": 20.588, "lon": -100.389},
-    "Quintana Roo": {"lat": 19.181, "lon": -88.479},
-    "San Luis Potosí": {"lat": 22.156, "lon": -100.985},
-    "Sinaloa": {"lat": 25.172, "lon": -107.479},
-    "Sonora": {"lat": 29.297, "lon": -110.330},
-    "Tabasco": {"lat": 17.840, "lon": -92.618},
-    "Tamaulipas": {"lat": 23.747, "lon": -98.525},
-    "Tlaxcala": {"lat": 19.318, "lon": -98.237},
-    "Veracruz": {"lat": 19.173, "lon": -96.134},
-    "Yucatán": {"lat": 20.709, "lon": -89.094},
-    "Zacatecas": {"lat": 22.770, "lon": -102.583}
-}
-
-# --- Agregar columnas de latitud y longitud ---
-parcelas_estado["Latitud"] = parcelas_estado["Estado"].map(lambda x: centros_estados.get(x, {}).get("lat", 23.0))
-parcelas_estado["Longitud"] = parcelas_estado["Estado"].map(lambda x: centros_estados.get(x, {}).get("lon", -102.0))
+# --- Agrupar por estado, sumando parcelas y promediando coordenadas ---
+parcelas_estado = parcelas.groupby("Estado").agg({
+    "Parcelas": "sum",
+    "Latitud": "mean",    # promedio de latitudes
+    "Longitud": "mean"    # promedio de longitudes
+}).reset_index()
 
 # --- Crear mapa de burbujas ---
 fig_estado = px.scatter_mapbox(
@@ -595,18 +555,19 @@ fig_estado = px.scatter_mapbox(
     hover_name="Estado",
     hover_data={"Parcelas": True, "Latitud": False, "Longitud": False},  
     size_max=6,  # 🔹 círculos más pequeños
-    color_continuous_scale="Turbo",  # 🔹 escala más diferenciada
+    color_continuous_scale="Plasma",  # 🔹 escala contrastante
     zoom=4.5,
     center={"lat": 23.0, "lon": -102.0},  # 🔹 enfocar en México
     mapbox_style="carto-positron",
     title="📍 Número de Parcelas Atendidas por Estado"
 )
 
-# --- Ajustar escala de colores en múltiplos de 5,000 ---
-cmin = int(parcelas_estado["Parcelas"].min() // 1000 * 1000)   # redondear hacia abajo
-cmax = int((parcelas_estado["Parcelas"].max() + 999) // 1000 * 1000)  # redondear hacia arriba
+# --- Ajustar escala de colores en automático ---
+cmin = parcelas_estado["Parcelas"].min()
+cmax = parcelas_estado["Parcelas"].max()
 
-step = 5000 if (cmax - cmin) > 10000 else 1000  # si el rango es grande usa 5000, si es chico usa 1000
+# Calcular pasos automáticos (ej. ~20 categorías)
+step = max(1000, int((cmax - cmin) / 20))  
 
 fig_estado.update_traces(
     marker=dict(
@@ -628,8 +589,8 @@ fig_estado.update_layout(
     height=700,
     coloraxis_colorbar=dict(
         title="Parcelas",
-        tickvals=list(range(cmin, cmax+1, step)),   # 🔹 ticks en múltiplos
-        ticktext=[f"{val:,}" for val in range(cmin, cmax+1, step)],  # 🔹 formato con separador de miles
+        tickvals=list(range(cmin, cmax+1, step)),
+        ticktext=[f"{x:,}" for x in range(cmin, cmax+1, step)]  # 🔹 etiquetas con separador de miles
     ),
 )
 
