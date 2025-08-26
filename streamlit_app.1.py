@@ -581,7 +581,7 @@ centros_estados = {
     "Zacatecas": {"lat": 22.770, "lon": -102.583}
 }
 
-# Agregar columnas de latitud y longitud
+# --- Agregar columnas de latitud y longitud ---
 parcelas_estado["Latitud"] = parcelas_estado["Estado"].map(lambda x: centros_estados.get(x, {}).get("lat", 23.0))
 parcelas_estado["Longitud"] = parcelas_estado["Estado"].map(lambda x: centros_estados.get(x, {}).get("lon", -102.0))
 
@@ -594,21 +594,25 @@ fig_estado = px.scatter_mapbox(
     color="Parcelas",
     hover_name="Estado",
     hover_data={"Parcelas": True, "Latitud": False, "Longitud": False},  
-    size_max=25,  # 🔹 más pequeños los círculos
-    color_continuous_scale="Plasma",  # 🔹 escala más contrastante
+    size_max=6,  # 🔹 círculos más pequeños
+    color_continuous_scale="Plasma",  # 🔹 escala contrastante
     zoom=4.5,
+    center={"lat": 23.0, "lon": -102.0},  # 🔹 enfocar en México
     mapbox_style="carto-positron",
     title="📍 Número de Parcelas Atendidas por Estado"
 )
 
-# Ajuste de la escala de colores para mayor diversidad
+# --- Ajustar escala de colores en automático ---
 cmin = parcelas_estado["Parcelas"].min()
-cmax = parcelas_estado["Parcelas"].max() * 3  # 🔹 expandir rango de colores
+cmax = parcelas_estado["Parcelas"].max()
+
+# Definir pasos automáticos (cada ~5,000 si aplica)
+step = max(1, int((cmax - cmin) / 6))  # divide en aprox 6 categorías
 fig_estado.update_traces(
     marker=dict(
         sizemode="area",
-        sizeref=10,   # 🔹 controla el tamaño, ahora más chico
-        sizemin=2,
+        sizeref=30,   # 🔹 aún más pequeños
+        sizemin=1,
         color=parcelas_estado["Parcelas"],
         cmin=cmin,
         cmax=cmax,
@@ -618,12 +622,15 @@ fig_estado.update_traces(
     textposition="top center"
 )
 
-# Layout general
+# --- Layout general ---
 fig_estado.update_layout(
     margin={"l":0,"r":0,"t":50,"b":0},
     height=700,
-    coloraxis_colorbar=dict(title="Parcelas"),
+    coloraxis_colorbar=dict(
+        title="Parcelas",
+        tickvals=list(range(cmin, cmax+1, step)),  # 🔹 marcas automáticas
+    ),
 )
 
-# Mostrar en Streamlit
+# --- Mostrar en Streamlit ---
 st.plotly_chart(fig_estado, use_container_width=True)
