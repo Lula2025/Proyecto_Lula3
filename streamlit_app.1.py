@@ -482,20 +482,32 @@ if {"Id_Productor", "Genero", "Proyecto", "Anio"}.issubset(datos_filtrados.colum
 
 
 
-# --- Crear mapa de dispersión ---
-# Opcional: agrupar por Estado si quieres mostrar número de parcelas por tamaño
+# --- Preparar datos para el mapa geográfico filtrado por Estado ---
+# Convertir Latitud y Longitud a numérico
+datos_filtrados["Latitud"] = pd.to_numeric(datos_filtrados["Latitud"], errors="coerce")
+datos_filtrados["Longitud"] = pd.to_numeric(datos_filtrados["Longitud"], errors="coerce")
+
+# Filtrar filas sin coordenadas
+datos_geo = datos_filtrados.dropna(subset=["Latitud", "Longitud"])
+
+# --- Agrupar por coordenadas y Estado ---
 parcelas_geo = (
-    datos_filtrados.groupby(["Latitud", "Longitud", "Estado"])["Id_Parcela(Unico)"]
+    datos_geo.groupby(["Latitud", "Longitud", "Estado"])["Id_Parcela(Unico)"]
     .nunique()
     .reset_index(name="Parcelas")
 )
 
+# --- Aplicar filtro dinámico por Estado si se seleccionó algo ---
+if seleccion_estados:  # 'seleccion_estados' viene de tu sidebar
+    parcelas_geo = parcelas_geo[parcelas_geo["Estado"].isin(seleccion_estados)]
+
+# --- Crear mapa interactivo ---
 fig_mapa_geo = px.scatter_mapbox(
     parcelas_geo,
     lat="Latitud",
     lon="Longitud",
-    size="Parcelas",            # tamaño del punto según número de parcelas
-    color="Estado",             # color por Estado
+    size="Parcelas",
+    color="Estado",
     hover_name="Estado",
     hover_data={"Latitud": True, "Longitud": True, "Parcelas": True},
     mapbox_style="carto-positron",
