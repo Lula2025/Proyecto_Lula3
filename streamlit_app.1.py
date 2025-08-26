@@ -124,6 +124,17 @@ with st.sidebar.expander("Tipo de Parcela"):
         datos_filtrados = datos_filtrados[datos_filtrados["Tipo_parcela"].isin(seleccion_tipos_parcela)]
 
 # Filtro por Estado
+
+cambios_estados = {
+    "MORELOS": "Morelos",
+    "PUEBLA": "Puebla",
+    "SINALOA": "Sinaloa",
+    "TABASCO": "Tabasco",
+    # agrega más según necesites
+}
+
+datos_filtrados["Estado"] = datos_filtrados["Estado"].replace(cambios_estados)
+
 with st.sidebar.expander("Estado"):
     estados = sorted(datos_filtrados["Estado"].unique())
     seleccion_estados = checkbox_list("Estado", estados, "estado")
