@@ -538,12 +538,49 @@ fig_mapa_geo.update_layout(
 st.plotly_chart(fig_mapa_geo, use_container_width=True)
 
 # -----------------------------------
-# --- Agrupar por estado, sumando parcelas y promediando coordenadas ---
-parcelas_estado = parcelas.groupby("Estado").agg({
-    "Parcelas": "sum",
-    "Latitud": "mean",    # promedio de latitudes
-    "Longitud": "mean"    # promedio de longitudes
-}).reset_index()
+# Crear DataFrame con el número de parcelas por estado
+parcelas = datos_filtrados.groupby("Estado").agg({
+    "Id_Parcela(Unico)": "nunique"  # Contar número de parcelas únicas
+}).reset_index().rename(columns={"Id_Parcela(Unico)": "Parcelas"})
+
+# --- Agregar columnas de latitud y longitud usando centros_estados ---
+centros_estados = {
+    "Aguascalientes": {"lat": 21.885, "lon": -102.291},
+    "Baja California": {"lat": 30.840, "lon": -115.283},
+    "Baja California Sur": {"lat": 26.049, "lon": -111.666},
+    "Campeche": {"lat": 19.830, "lon": -90.534},
+    "Chiapas": {"lat": 16.756, "lon": -93.116},
+    "Chihuahua": {"lat": 28.632, "lon": -106.069},
+    "Ciudad de México": {"lat": 19.432, "lon": -99.133},
+    "Coahuila": {"lat": 27.058, "lon": -101.706},
+    "Colima": {"lat": 19.243, "lon": -103.724},
+    "Durango": {"lat": 24.027, "lon": -104.653},
+    "Guanajuato": {"lat": 21.019, "lon": -101.257},
+    "Guerrero": {"lat": 17.551, "lon": -99.503},
+    "Hidalgo": {"lat": 20.091, "lon": -98.762},
+    "Jalisco": {"lat": 20.659, "lon": -103.349},
+    "México": {"lat": 19.345, "lon": -99.837},
+    "Michoacán": {"lat": 19.566, "lon": -101.706},
+    "Morelos": {"lat": 18.681, "lon": -99.101},
+    "Nayarit": {"lat": 21.751, "lon": -104.845},
+    "Nuevo León": {"lat": 25.675, "lon": -100.318},
+    "Oaxaca": {"lat": 17.073, "lon": -96.726},
+    "Puebla": {"lat": 19.041, "lon": -98.206},
+    "Querétaro": {"lat": 20.588, "lon": -100.389},
+    "Quintana Roo": {"lat": 19.181, "lon": -88.479},
+    "San Luis Potosí": {"lat": 22.156, "lon": -100.985},
+    "Sinaloa": {"lat": 25.172, "lon": -107.479},
+    "Sonora": {"lat": 29.297, "lon": -110.330},
+    "Tabasco": {"lat": 17.840, "lon": -92.618},
+    "Tamaulipas": {"lat": 23.747, "lon": -98.525},
+    "Tlaxcala": {"lat": 19.318, "lon": -98.237},
+    "Veracruz": {"lat": 19.173, "lon": -96.134},
+    "Yucatán": {"lat": 20.709, "lon": -89.094},
+    "Zacatecas": {"lat": 22.770, "lon": -102.583}
+}
+
+parcelas["Latitud"] = parcelas["Estado"].map(lambda x: centros_estados.get(x, {}).get("lat", 23.0))
+parcelas["Longitud"] = parcelas["Estado"].map(lambda x: centros_estados.get(x, {}).get("lon", -102.0))
 
 # --- Crear mapa de burbujas ---
 fig_estado = px.scatter_mapbox(
