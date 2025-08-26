@@ -585,7 +585,7 @@ centros_estados = {
 parcelas_estado["Latitud"] = parcelas_estado["Estado"].map(lambda x: centros_estados.get(x, {}).get("lat", 23.0))
 parcelas_estado["Longitud"] = parcelas_estado["Estado"].map(lambda x: centros_estados.get(x, {}).get("lon", -102.0))
 
-# --- Crear mapa de burbujas con etiquetas ---
+# --- Crear mapa de burbujas ---
 fig_estado = px.scatter_mapbox(
     parcelas_estado,
     lat="Latitud",
@@ -594,16 +594,16 @@ fig_estado = px.scatter_mapbox(
     color="Parcelas",
     hover_name="Estado",
     hover_data={"Parcelas": True, "Latitud": False, "Longitud": False},  # quitar lat/lon del hover
-    size_max=50,
-    color_continuous_scale="Viridis",
+    size_max=50,  # mantiene tamaño original
+    color_continuous_scale="Viridis",  # escala con más diversidad
     zoom=4.5,
     mapbox_style="carto-positron",
     title="📍 Número de Parcelas Atendidas por Estado"
 )
 
-# Ajustes de marker para más diversidad de colores y mostrar número de parcelas
+# Ajuste de la escala de colores para más diversidad
 cmin = parcelas_estado["Parcelas"].min()
-cmax = parcelas_estado["Parcelas"].max() * 1.5  # ampliar rango de colores
+cmax = parcelas_estado["Parcelas"].max() * 1.5  # ampliar rango para que colores sean más variados
 fig_estado.update_traces(
     marker=dict(
         sizemode="area",
@@ -614,7 +614,7 @@ fig_estado.update_traces(
         cmax=cmax,
         showscale=True
     ),
-    text=parcelas_estado["Parcelas"],  # mostrar número de parcelas sobre el círculo
+    text=parcelas_estado["Parcelas"],  # mostrar número de parcelas sobre cada círculo
     textposition="top center"
 )
 
