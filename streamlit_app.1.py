@@ -595,19 +595,19 @@ fig_estado = px.scatter_mapbox(
     hover_name="Estado",
     hover_data={"Parcelas": True, "Latitud": False, "Longitud": False},  
     size_max=6,  # 🔹 círculos más pequeños
-    color_continuous_scale="Plasma",  # 🔹 escala contrastante
+    color_continuous_scale="Turbo",  # 🔹 escala más diferenciada
     zoom=4.5,
     center={"lat": 23.0, "lon": -102.0},  # 🔹 enfocar en México
     mapbox_style="carto-positron",
     title="📍 Número de Parcelas Atendidas por Estado"
 )
 
-# --- Ajustar escala de colores en automático ---
-cmin = parcelas_estado["Parcelas"].min()
-cmax = parcelas_estado["Parcelas"].max()
+# --- Ajustar escala de colores en múltiplos de 5,000 ---
+cmin = int(parcelas_estado["Parcelas"].min() // 1000 * 1000)   # redondear hacia abajo
+cmax = int((parcelas_estado["Parcelas"].max() + 999) // 1000 * 1000)  # redondear hacia arriba
 
-# Definir pasos automáticos (cada ~5,000 si aplica)
-step = max(1, int((cmax - cmin) / 20))  # divide en aprox 6 categorías
+step = 5000 if (cmax - cmin) > 10000 else 1000  # si el rango es grande usa 5000, si es chico usa 1000
+
 fig_estado.update_traces(
     marker=dict(
         sizemode="area",
@@ -628,7 +628,8 @@ fig_estado.update_layout(
     height=700,
     coloraxis_colorbar=dict(
         title="Parcelas",
-        tickvals=list(range(cmin, cmax+1, step)),  # 🔹 marcas automáticas
+        tickvals=list(range(cmin, cmax+1, step)),   # 🔹 ticks en múltiplos
+        ticktext=[f"{val:,}" for val in range(cmin, cmax+1, step)],  # 🔹 formato con separador de miles
     ),
 )
 
