@@ -538,12 +538,12 @@ fig_mapa_geo.update_layout(
 st.plotly_chart(fig_mapa_geo, use_container_width=True)
 
 # -----------------------------------
-# Crear DataFrame con el número de parcelas por estado
-parcelas = datos_filtrados.groupby("Estado").agg({
-    "Id_Parcela(Unico)": "nunique"  # Contar número de parcelas únicas
+# --- Crear DataFrame con número de parcelas por estado ---
+parcelas_estado = datos_filtrados.groupby("Estado").agg({
+    "Id_Parcela(Unico)": "nunique"  # Contar parcelas únicas
 }).reset_index().rename(columns={"Id_Parcela(Unico)": "Parcelas"})
 
-# --- Agregar columnas de latitud y longitud usando centros_estados ---
+# --- Coordenadas aproximadas para el centro de cada estado ---
 centros_estados = {
     "Aguascalientes": {"lat": 21.885, "lon": -102.291},
     "Baja California": {"lat": 30.840, "lon": -115.283},
@@ -579,8 +579,9 @@ centros_estados = {
     "Zacatecas": {"lat": 22.770, "lon": -102.583}
 }
 
-parcelas["Latitud"] = parcelas["Estado"].map(lambda x: centros_estados.get(x, {}).get("lat", 23.0))
-parcelas["Longitud"] = parcelas["Estado"].map(lambda x: centros_estados.get(x, {}).get("lon", -102.0))
+# --- Agregar columnas de latitud y longitud ---
+parcelas_estado["Latitud"] = parcelas_estado["Estado"].map(lambda x: centros_estados.get(x, {}).get("lat", 23.0))
+parcelas_estado["Longitud"] = parcelas_estado["Estado"].map(lambda x: centros_estados.get(x, {}).get("lon", -102.0))
 
 # --- Crear mapa de burbujas ---
 fig_estado = px.scatter_mapbox(
@@ -590,26 +591,26 @@ fig_estado = px.scatter_mapbox(
     size="Parcelas",
     color="Parcelas",
     hover_name="Estado",
-    hover_data={"Parcelas": True, "Latitud": False, "Longitud": False},  
+    hover_data={"Parcelas": True, "Latitud": False, "Longitud": False},
     size_max=6,  # 🔹 círculos más pequeños
     color_continuous_scale="Plasma",  # 🔹 escala contrastante
     zoom=4.5,
-    center={"lat": 23.0, "lon": -102.0},  # 🔹 enfocar en México
+    center={"lat": 23.0, "lon": -102.0},
     mapbox_style="carto-positron",
     title="📍 Número de Parcelas Atendidas por Estado"
 )
 
-# --- Ajustar escala de colores en automático ---
+# --- Ajuste de escala de colores y leyenda ---
 cmin = parcelas_estado["Parcelas"].min()
 cmax = parcelas_estado["Parcelas"].max()
 
-# Calcular pasos automáticos (ej. ~20 categorías)
-step = max(1000, int((cmax - cmin) / 20))  
+# Definir pasos automáticos cada ~5,000 parcelas
+step = max(1, int(cmax / 5_000) * 5_000)
 
 fig_estado.update_traces(
     marker=dict(
         sizemode="area",
-        sizeref=30,   # 🔹 aún más pequeños
+        sizeref=30,  # controlar tamaño de círculos
         sizemin=1,
         color=parcelas_estado["Parcelas"],
         cmin=cmin,
@@ -620,16 +621,18 @@ fig_estado.update_traces(
     textposition="top center"
 )
 
-# --- Layout general ---
+# Ajustar leyenda para mostrar miles y colores más diferenciados
 fig_estado.update_layout(
     margin={"l":0,"r":0,"t":50,"b":0},
     height=700,
     coloraxis_colorbar=dict(
         title="Parcelas",
-        tickvals=list(range(cmin, cmax+1, step)),
-        ticktext=[f"{x:,}" for x in range(cmin, cmax+1, step)]  # 🔹 etiquetas con separador de miles
-    ),
+        tickvals=list(range(0, cmax + step, step)),
+        ticktext=[f"{v//1000}k" for v in range(0, cmax + step, step)]
+    )
 )
 
 # --- Mostrar en Streamlit ---
 st.plotly_chart(fig_estado, use_container_width=True)
+
+
