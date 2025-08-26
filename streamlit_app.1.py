@@ -593,28 +593,28 @@ fig_estado = px.scatter_mapbox(
     size="Parcelas",
     color="Parcelas",
     hover_name="Estado",
-    hover_data={"Parcelas": True, "Latitud": False, "Longitud": False},  # quitar lat/lon del hover
-    size_max=50,  # mantiene tamaño original
-    color_continuous_scale="Viridis",  # escala con más diversidad
+    hover_data={"Parcelas": True, "Latitud": False, "Longitud": False},  
+    size_max=25,  # 🔹 más pequeños los círculos
+    color_continuous_scale="Plasma",  # 🔹 escala más contrastante
     zoom=4.5,
     mapbox_style="carto-positron",
     title="📍 Número de Parcelas Atendidas por Estado"
 )
 
-# Ajuste de la escala de colores para más diversidad
+# Ajuste de la escala de colores para mayor diversidad
 cmin = parcelas_estado["Parcelas"].min()
-cmax = parcelas_estado["Parcelas"].max() * 1.5  # ampliar rango para que colores sean más variados
+cmax = parcelas_estado["Parcelas"].max() * 2  # 🔹 expandir rango de colores
 fig_estado.update_traces(
     marker=dict(
         sizemode="area",
-        sizeref=2,
-        sizemin=5,
+        sizeref=5,   # 🔹 controla el tamaño, ahora más chico
+        sizemin=3,
         color=parcelas_estado["Parcelas"],
         cmin=cmin,
         cmax=cmax,
         showscale=True
     ),
-    text=parcelas_estado["Parcelas"],  # mostrar número de parcelas sobre cada círculo
+    text=parcelas_estado["Parcelas"],  
     textposition="top center"
 )
 
