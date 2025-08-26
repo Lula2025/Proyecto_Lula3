@@ -603,12 +603,12 @@ fig_estado = px.scatter_mapbox(
 
 # Ajuste de la escala de colores para mayor diversidad
 cmin = parcelas_estado["Parcelas"].min()
-cmax = parcelas_estado["Parcelas"].max() * 2  # 🔹 expandir rango de colores
+cmax = parcelas_estado["Parcelas"].max() * 3  # 🔹 expandir rango de colores
 fig_estado.update_traces(
     marker=dict(
         sizemode="area",
-        sizeref=5,   # 🔹 controla el tamaño, ahora más chico
-        sizemin=3,
+        sizeref=10,   # 🔹 controla el tamaño, ahora más chico
+        sizemin=2,
         color=parcelas_estado["Parcelas"],
         cmin=cmin,
         cmax=cmax,
