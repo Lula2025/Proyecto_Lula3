@@ -483,23 +483,24 @@ if {"Id_Productor", "Genero", "Proyecto", "Anio"}.issubset(datos_filtrados.colum
 
 
 # --- Preparar datos para el mapa geográfico filtrado por Estado ---
-# Convertir Latitud y Longitud a numérico
 datos_filtrados["Latitud"] = pd.to_numeric(datos_filtrados["Latitud"], errors="coerce")
 datos_filtrados["Longitud"] = pd.to_numeric(datos_filtrados["Longitud"], errors="coerce")
-
-# Filtrar filas sin coordenadas
 datos_geo = datos_filtrados.dropna(subset=["Latitud", "Longitud"])
 
-# --- Agrupar por coordenadas y Estado ---
+# Agrupar por coordenadas y Estado
 parcelas_geo = (
     datos_geo.groupby(["Latitud", "Longitud", "Estado"])["Id_Parcela(Unico)"]
     .nunique()
     .reset_index(name="Parcelas")
 )
 
-# --- Aplicar filtro dinámico por Estado si se seleccionó algo ---
-if seleccion_estados:  # 'seleccion_estados' viene de tu sidebar
+# Aplicar filtro dinámico por Estado si se seleccionó algo
+if seleccion_estados:
     parcelas_geo = parcelas_geo[parcelas_geo["Estado"].isin(seleccion_estados)]
+
+# --- Calcular el centro y límites automáticamente ---
+lat_center = (parcelas_geo["Latitud"].min() + parcelas_geo["Latitud"].max()) / 2
+lon_center = (parcelas_geo["Longitud"].min() + parcelas_geo["Longitud"].max()) / 2
 
 # --- Crear mapa interactivo ---
 fig_mapa_geo = px.scatter_mapbox(
@@ -511,11 +512,11 @@ fig_mapa_geo = px.scatter_mapbox(
     hover_name="Estado",
     hover_data={"Latitud": True, "Longitud": True, "Parcelas": True},
     mapbox_style="carto-positron",
-    zoom=4,
+    center={"lat": lat_center, "lon": lon_center},  # Centrar mapa
+    zoom=4.5,                                       # Ajusta para abarcar toda México
     title="📍 Distribución Geográfica de Parcelas por Estado"
 )
 
-# Ajustar tamaño máximo de los puntos
 fig_mapa_geo.update_traces(marker=dict(sizemode="area", sizeref=2, sizemin=5))
 
 # Mostrar el mapa en Streamlit
