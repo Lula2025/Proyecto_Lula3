@@ -479,3 +479,32 @@ if {"Id_Productor", "Genero", "Proyecto", "Anio"}.issubset(datos_filtrados.colum
 
     # Mostrar tabla pivote
     st.dataframe(tabla_pivote, use_container_width=True)
+
+
+
+# --- Crear mapa de dispersión ---
+# Opcional: agrupar por Estado si quieres mostrar número de parcelas por tamaño
+parcelas_geo = (
+    datos_filtrados.groupby(["Latitud", "Longitud", "Estado"])["Id_Parcela(Unico)"]
+    .nunique()
+    .reset_index(name="Parcelas")
+)
+
+fig_mapa_geo = px.scatter_mapbox(
+    parcelas_geo,
+    lat="Latitud",
+    lon="Longitud",
+    size="Parcelas",            # tamaño del punto según número de parcelas
+    color="Estado",             # color por Estado
+    hover_name="Estado",
+    hover_data={"Latitud": True, "Longitud": True, "Parcelas": True},
+    mapbox_style="carto-positron",
+    zoom=4,
+    title="📍 Distribución Geográfica de Parcelas por Estado"
+)
+
+# Ajustar tamaño máximo de los puntos
+fig_mapa_geo.update_traces(marker=dict(sizemode="area", sizeref=2, sizemin=5))
+
+# Mostrar el mapa en Streamlit
+st.plotly_chart(fig_mapa_geo, use_container_width=True)
