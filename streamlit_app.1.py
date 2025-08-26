@@ -133,6 +133,7 @@ cambios_estados = {
     "Michoacán de Ocampo": "Michoacán",
     "Ciudad de Mexico": "Ciudad de México",
     "Veracruz de Ignacio de la Llave": "Veracruz",
+    "Coahuila de Zaragoza": "Coahuila",
     
     # agrega más según necesites
 }
