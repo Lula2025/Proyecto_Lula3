@@ -543,9 +543,9 @@ fig_mapa_geo.update_layout(
 st.plotly_chart(fig_mapa_geo, use_container_width=True)
 
 # -----------------------------------
-# --- Crear DataFrame con número de parcelas por estado dinámicamente ---
+# --- Crear DataFrame con número de parcelas por estado según el filtro activo ---
 parcelas_estado = datos_filtrados.groupby("Estado").agg({
-    "Id_Parcela(Unico)": "nunique"  # Contar parcelas únicas
+    "Id_Parcela(Unico)": "nunique"
 }).reset_index().rename(columns={"Id_Parcela(Unico)": "Parcelas"})
 
 # --- Coordenadas aproximadas para el centro de cada estado ---
@@ -596,8 +596,8 @@ fig_estado = px.scatter_mapbox(
     size="Parcelas",
     color="Parcelas",
     hover_name="Estado",
-    hover_data={"Parcelas": True, "Latitud": False, "Longitud": False},
-    size_max=6,
+    hover_data={"Parcelas": True, "Latitud": False, "Longitud": False},  
+    size_max=6,  # círculos pequeños
     color_continuous_scale="Plasma",
     zoom=4.5,
     center={"lat": 23.0, "lon": -102.0},
@@ -605,34 +605,37 @@ fig_estado = px.scatter_mapbox(
     title="📍 Número de Parcelas Atendidas por Estado"
 )
 
-# --- Ajustar escala de colores y leyenda ---
+# --- Ajuste dinámico de escala de colores ---
 cmin = parcelas_estado["Parcelas"].min()
 cmax = parcelas_estado["Parcelas"].max()
-step = max(1, int(cmax / 5_000) * 5_000)  # cada 5,000 parcelas
+
+# Dividir la leyenda en 5–6 intervalos para mayor diversidad de colores
+step = max(1, (cmax - cmin) // 6)
 
 fig_estado.update_traces(
     marker=dict(
         sizemode="area",
-        sizeref=30,
+        sizeref=30,  # controlar tamaño de círculos
         sizemin=1,
         color=parcelas_estado["Parcelas"],
         cmin=cmin,
         cmax=cmax,
         showscale=True
     ),
-    text=parcelas_estado["Parcelas"],
+    text=parcelas_estado["Parcelas"],  
     textposition="top center"
 )
 
+# --- Leyenda y layout general ---
 fig_estado.update_layout(
     margin={"l":0,"r":0,"t":50,"b":0},
     height=700,
     coloraxis_colorbar=dict(
         title="Parcelas",
-        tickvals=list(range(0, cmax + step, step)),
-        ticktext=[f"{v//1000}k" for v in range(0, cmax + step, step)]
+        tickvals=list(range(cmin, cmax + step, step)),
+        ticktext=[f"{v//1000}k" for v in range(cmin, cmax + step, step)]
     )
 )
 
-# --- Mostrar en Streamlit con actualización automática ---
+# --- Mostrar en Streamlit ---
 st.plotly_chart(fig_estado, use_container_width=True)
