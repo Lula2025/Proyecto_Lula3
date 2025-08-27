@@ -528,6 +528,15 @@ parcelas_geo = (
     .reset_index(name="Parcelas")
 )
 
+# --- Sidebar filtro por Tipo de sistema ---
+with st.sidebar.expander("Tipo de sistema"):
+    opciones_sistema = sorted(datos_filtrados["Tipo de sistema"].dropna().unique())
+    seleccion_sistema = st.multiselect(
+        "Selecciona tipo(s) de sistema",
+        opciones_sistema,
+        default=opciones_sistema  # inicia con todos seleccionados
+    )
+
 # Aplicar filtro dinámico por Tipo de sistema si se seleccionó algo
 if seleccion_sistema:   # <- aquí necesitarías definir seleccion_sistema en tu sidebar
     parcelas_geo = parcelas_geo[parcelas_geo["Tipo de sistema"].isin(seleccion_sistema)]
