@@ -165,6 +165,33 @@ with st.sidebar.expander("Régimen Hídrico"):
 if st.session_state.limpiar_filtros:
     st.session_state.limpiar_filtros = False
 
+
+
+
+# Filtro por Año
+
+with st.sidebar.expander("Año"):
+    opciones_anio = sorted(datos_filtrados["Anio"].unique())
+
+    # Checkbox para seleccionar todos
+    seleccionar_todos = st.checkbox("Seleccionar todos los años", value=True)
+
+    if seleccionar_todos:
+        seleccion_anio = opciones_anio  # todos seleccionados
+    else:
+        seleccion_anio = st.multiselect(
+            "Selecciona Año",
+            opciones_anio,
+            default=opciones_anio  # puedes dejarlo vacío [] si prefieres
+        )
+
+    # Filtrar datos
+    if seleccion_anio:
+        datos_filtrados = datos_filtrados[datos_filtrados["Anio"].isin(seleccion_anio)]
+
+
+
+
 # --- Resumen de cifras totales ---
 st.markdown("### Informe de acuerdo a los Datos Filtrados")
 
