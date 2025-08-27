@@ -173,17 +173,19 @@ if st.session_state.limpiar_filtros:
 with st.sidebar.expander("Año"):
     opciones_anio = sorted(datos_filtrados["Anio"].unique())
 
-    # Checkbox para seleccionar todos
+    # Checkbox general
     seleccionar_todos = st.checkbox("Seleccionar todos los años", value=True)
 
-    if seleccionar_todos:
-        seleccion_anio = opciones_anio  # todos seleccionados
-    else:
-        seleccion_anio = st.multiselect(
-            "Selecciona Año",
-            opciones_anio,
-            default=opciones_anio  # puedes dejarlo vacío [] si prefieres
-        )
+    # Crear casillas independientes para cada año
+    seleccion_anio = []
+    for anio in opciones_anio:
+        if seleccionar_todos:
+            checked = True
+        else:
+            checked = False
+
+        if st.checkbox(str(anio), value=checked, key=f"anio_{anio}"):
+            seleccion_anio.append(anio)
 
     # Filtrar datos
     if seleccion_anio:
