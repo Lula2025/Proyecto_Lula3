@@ -521,16 +521,16 @@ datos_filtrados["Latitud"] = pd.to_numeric(datos_filtrados["Latitud"], errors="c
 datos_filtrados["Longitud"] = pd.to_numeric(datos_filtrados["Longitud"], errors="coerce")
 datos_geo = datos_filtrados.dropna(subset=["Latitud", "Longitud"])
 
-# Agrupar por coordenadas y Estado
+# Agrupar por coordenadas y Tipo de sistema
 parcelas_geo = (
-    datos_geo.groupby(["Latitud", "Longitud", "Estado"])["Id_Parcela(Unico)"]
+    datos_geo.groupby(["Latitud", "Longitud", "Tipo de sistema"])["Id_Parcela(Unico)"]
     .nunique()
     .reset_index(name="Parcelas")
 )
 
-# Aplicar filtro dinámico por Estado si se seleccionó algo
-if seleccion_estados:
-    parcelas_geo = parcelas_geo[parcelas_geo["Estado"].isin(seleccion_estados)]
+# Aplicar filtro dinámico por Tipo de sistema si se seleccionó algo
+if seleccion_sistema:   # <- aquí necesitarías definir seleccion_sistema en tu sidebar
+    parcelas_geo = parcelas_geo[parcelas_geo["Tipo de sistema"].isin(seleccion_sistema)]
 
 # --- Definir centro y límites para México ---
 mexico_center = {"lat": 23.0, "lon": -102.0}  # Centro aproximado de México
@@ -543,15 +543,15 @@ fig_mapa_geo = px.scatter_mapbox(
     lat="Latitud",
     lon="Longitud",
     size="Parcelas",
-    color="Estado",
-    hover_name="Estado",
+    color="Tipo de sistema",   # <- cambio aquí
+    hover_name="Tipo de sistema",  # <- cambio aquí
     hover_data={"Latitud": True, "Longitud": True, "Parcelas": True},
     mapbox_style="carto-positron",
     center=mexico_center,
-    zoom=4.5,  # Ajusta para ver todo México
-    height=700,  # Hacerlo más cuadrado
-    width=700,   # Opcional si quieres controlar el ancho
-    title="📍 Distribución Geográfica de Parcelas en México"
+    zoom=4.5,
+    height=700,
+    width=700,
+    title="📍 Distribución Geográfica de Parcelas por Tipo de Sistema"
 )
 
 # Ajustar tamaño máximo de los puntos
@@ -570,6 +570,8 @@ fig_mapa_geo.update_layout(
 
 # Mostrar mapa en Streamlit
 st.plotly_chart(fig_mapa_geo, use_container_width=True)
+
+
 
 # -----------------------------------
 # --- Crear DataFrame con número de parcelas por estado según el filtro activo ---
